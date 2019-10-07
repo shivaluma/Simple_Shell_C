@@ -37,22 +37,22 @@ Nếu không có lệnh gần đây trong lịch sử, hãy nhập `!!` sẽ d�
 `>` Hồi chuyển hướng đầu ra của một lệnh thành một tệp.
 `<` Hồi chuyển hướng đầu vào thành một lệnh từ một tệp. 
 
-Ví dụ: Nếu người dùng nhập `ls> out.txt`, đầu ra từ lệnh ls sẽ được chuyển hướng đến tệp out.txt. 
+Ví dụ: Nếu người dùng nhập `ls> out.txt`, đầu ra từ lệnh `ls` sẽ được chuyển hướng đến tệp `out.txt`. 
 Tương tự, đầu vào cũng có thể được chuyển hướng. 
-Ví dụ: nếu người dùng nhập `sort <in.txt`, tệp in.txt sẽ đóng vai trò là đầu vào cho lệnh sort.
+Ví dụ: nếu người dùng nhập `sort <in.txt`, tệp `in.txt` sẽ đóng vai trò là đầu vào cho lệnh `sort`.
 
 Việc quản lý chuyển hướng của cả đầu vào và đầu ra sẽ liên quan đến việc sử dụng hàm `dup2()`, sao chép một bộ mô tả tệp hiện có sang một bộ mô tả tệp khác. 
-Ví dụ: nếu f là một mô tả tệp cho tệp out.txt, sau dòng lệnh `dup2(f, STDOUT_FILENO);` f được nhân bản thành đầu ra tiêu chuẩn (stdout). Điều này có nghĩa là bất kỳ ghi vào stdout sẽ được gửi đến tệp out.txt.
+Ví dụ: nếu `f` là một mô tả tệp cho tệp `out.txt`, sau dòng lệnh `dup2(f, STDOUT_FILENO);` f được nhân bản thành đầu ra tiêu chuẩn `stdout`. Điều này có nghĩa là bất kỳ ghi vào `stdout` sẽ được gửi đến tệp `out.txt`.
 
 ## Giao tiếp lệnh qua đường ống (Communication via a Pipe)
 Cho phép đầu ra của một lệnh được dùng làm đầu vào cho một lệnh khác bằng cách sử dụng một đường ống. 
 
 Chúng ta tách lệnh ban đầu thành 2 lệnh con có dạng `command1 | command2`, sau đó nối 1 đầu pipe vào `stdout` và thực thi lệnh `command1` để lấy kết quả
-Bước tiếp theo, ta nối đầu còn lại pipe vào stdin và chạy `command2`
+Bước tiếp theo, ta nối đầu còn lại pipe vào `stdin` và chạy `command2`
 
-Ví dụ: chuỗi lệnh sau `ls -l | less` có đầu ra của lệnh `ls -l` đóng vai trò là đầu vào cho lệnh less. 
-Cả hai lệnh `ls` và `less` sẽ chạy như các tiến trình riêng biệt và sẽ giao tiếp bằng cách sử dụng hàm pipe() của UNIX. 
+Ví dụ: chuỗi lệnh sau `ls -l | less` có đầu ra của lệnh `ls -l` đóng vai trò là đầu vào cho lệnh `less`. 
+Cả hai lệnh `ls` và `less` sẽ chạy như các tiến trình riêng biệt và sẽ giao tiếp bằng cách sử dụng hàm `pipe()` của UNIX. 
 
 Ở đây chúng ta tách lệnh ban đầu thành 2 lệnh con có dạng `command1: ls -l` và `command2: less`, sau đó nối 1 đầu pipe vào `stdout` và thực thi lệnh `command1` để lấy kết quả, ta được 
-Bước tiếp theo, ta nối đầu còn lại pipe vào stdin và chạy `command2`
-Vậy là đầu ra của lệnh `ls -la` được dùng làm đầu vào của `less`. Bài toán được giải quyết
+Bước tiếp theo, ta nối đầu còn lại pipe vào `stdin` và chạy `command2`
+Vậy là đầu ra của lệnh `ls -la` được dùng làm đầu vào của `less`. Lệnh người dùng được hoàn tất thực thi
