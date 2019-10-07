@@ -8,9 +8,12 @@
 #define MAXLINE 80
 
 
-void freeArgs(char *args[], int argv) {
-    for (int i = 0; i < argv; i++) {
+void freeArgs(char *args[]) {
+    int i = 0;
+    while(args[i] != NULL) {
         free(args[i]);
+        i++;
+        if (i == 80) break;
     }
 }
 
@@ -36,7 +39,7 @@ void readCommandFromUser(char *args[], int *hasAmp, int *argv) {
     }
 
     //nguoc lai thi giai phong lenh cu
-    freeArgs(args, *argv);
+    freeArgs(args);
     *argv = 0;
     *hasAmp = 0;
     char *ptr = strtok(userCommand, delimiter);
@@ -80,7 +83,7 @@ int main(void) {
                     if (strcmp(args[i], "<") == 0) {
 
                         // case input from file
-                        file = open(args[i + 1], O_RDONLY);
+                        file = open(args[i + 1], O_RDONLY, 0644);
                         dup2(file, STDIN_FILENO);
                         args[i] = NULL;
                         args[i + 1] = NULL;
@@ -95,28 +98,30 @@ int main(void) {
                         args[i + 1] = NULL;
                         redirectCase = 2;
                         break;
+
+                        // case pipe
                     } else if (strcmp(args[i], "|") == 0) {
                         usingPipe = 1;
-                        //case output from file
+
                         int fd1[2];
 
                         if (pipe(fd1) == -1) {
                             fprintf(stderr, "Pipe Failed");
                             return 1;
                         }
-
+                        // tach 2 command, noi 1 dau pipe vao stdout chay command 1 lay kq
+                        // noi pipe vao stdin, chay command 2
                         char *firstCommand[i + 1];
                         char *secondCommand[argv - i - 1 + 1];
                         for (int j = 0; j < i; j++) {
-                            firstCommand[j] = strdup(args[j]);
+                            firstCommand[j] = args[j];
                         }
                         firstCommand[i] = NULL;
                         for (int j = 0; j < argv - i - 1; j++) {
-                            secondCommand[j] = strdup(args[j + i + 1]);
+                            secondCommand[j] = args[j + i + 1];
 
                         }
                         secondCommand[argv - i - 1] = NULL;
-
 
                         int pid_pipe = fork();
                         if (pid_pipe > 0) {
@@ -144,8 +149,6 @@ int main(void) {
                       break;
                     }
                 }
-
-
 
                 //case arguments dont have redirect
                 if (usingPipe == 0) {
