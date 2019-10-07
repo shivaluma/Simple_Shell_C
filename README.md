@@ -34,7 +34,7 @@ Nếu không có lệnh gần đây trong lịch sử, hãy nhập `!!` sẽ d�
 Đồng thời, nếu kiểm tra lệnh cũ là `!!` thì sẽ vẫn giữ lại bộ đệm lịch sử, hoặc không thì sẽ giải phóng bộ đệm và bắt đầu ghi
 
 ## Chuyển hướng đầu vào và đầu ra (Redirecting Input and Output)
-`>` Hồi chuyển hướng đầu ra của một lệnh thành một tệp 
+`>` Hồi chuyển hướng đầu ra của một lệnh thành một tệp.
 `<` Hồi chuyển hướng đầu vào thành một lệnh từ một tệp. 
 
 Ví dụ: Nếu người dùng nhập `ls> out.txt`, đầu ra từ lệnh ls sẽ được chuyển hướng đến tệp out.txt. 
