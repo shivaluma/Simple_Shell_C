@@ -39,7 +39,7 @@ void readCommandFromUser(char *args[], int *hasAmp, int *argv) {
     }
 
     //nguoc lai thi giai phong lenh cu
-    freeArgs(args,argv);
+    freeArgs(args, *argv);
     *argv = 0;
     *hasAmp = 0;
     char *ptr = strtok(userCommand, delimiter);
