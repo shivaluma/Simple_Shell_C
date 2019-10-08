@@ -8,9 +8,9 @@
 #define MAXLINE 80
 
 
-void freeArgs(char *args[]) {
+void freeArgs(char *args[],int argv) {
     int i = 0;
-    while(args[i] != NULL) {
+    while(args[i] != NULL && (i < argv)) {
         free(args[i]);
         i++;
         if (i == 80) break;
@@ -39,7 +39,7 @@ void readCommandFromUser(char *args[], int *hasAmp, int *argv) {
     }
 
     //nguoc lai thi giai phong lenh cu
-    freeArgs(args);
+    freeArgs(args,argv);
     *argv = 0;
     *hasAmp = 0;
     char *ptr = strtok(userCommand, delimiter);
@@ -83,7 +83,7 @@ int main(void) {
                     if (strcmp(args[i], "<") == 0) {
 
                         // case input from file
-                        file = open(args[i + 1], O_RDONLY, 0644);
+                        file = open(args[i + 1], O_RDONLY);
                         dup2(file, STDIN_FILENO);
                         args[i] = NULL;
                         args[i + 1] = NULL;
@@ -106,7 +106,7 @@ int main(void) {
                         int fd1[2];
 
                         if (pipe(fd1) == -1) {
-                            fprintf(stderr, "Pipe Failed");
+                            fprintf(stderr, "Pipe Failed\n");
                             return 1;
                         }
                         // tach 2 command, noi 1 dau pipe vao stdout chay command 1 lay kq
@@ -125,7 +125,6 @@ int main(void) {
 
                         int pid_pipe = fork();
                         if (pid_pipe > 0) {
-                            int status;
                             wait(NULL);
                             close(fd1[1]);
                             dup2(fd1[0], STDIN_FILENO);
@@ -146,7 +145,7 @@ int main(void) {
                         }
                         close(fd1[0]);
                         close(fd1[1]);
-                      break;
+                        break;
                     }
                 }
 
