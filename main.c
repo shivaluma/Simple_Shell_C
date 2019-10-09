@@ -35,6 +35,9 @@ void readCommandFromUser(char *args[], int *hasAmp, int *argv) {
     // kiem tra neu la lenh history thi se thoat.
     // lenh cu van duoc luu trong args
     if (strcmp(userCommand, "!!") == 0) {
+        if (*argv == 0) {
+            printf("No commands in history.\n");
+        }
         return;
     }
 
@@ -73,26 +76,31 @@ int main(void) {
         pid = fork();
         if (pid == 0) {
             if (argv == 0) {
-                printf("No commands in history.\n");
+                continue;
             } else {
                 int redirectCase = 0;
                 int file;
-                for (int i = 1; i < argv - 1; i++) {
-
+                for (int i = 1; i <= argv - 1; i++) {
                     // next args will be file name.
                     if (strcmp(args[i], "<") == 0) {
-
                         // case input from file
                         file = open(args[i + 1], O_RDONLY);
+                        if (file == -1 || args[i+1]  == NULL) {
+                            printf("Invalid Command!\n");
+                            exit(1);
+                        }
                         dup2(file, STDIN_FILENO);
                         args[i] = NULL;
                         args[i + 1] = NULL;
                         redirectCase = 1;
                         break;
                     } else if (strcmp(args[i], ">") == 0) {
-
                         //case output from file
                         file = open(args[i + 1], O_WRONLY | O_CREAT, 0644);
+                        if (file == -1 || args[i+1]  == NULL) {
+                            printf("Invalid Command!\n");
+                            exit(1);
+                        }
                         dup2(file, STDOUT_FILENO);
                         args[i] = NULL;
                         args[i + 1] = NULL;
@@ -135,6 +143,7 @@ int main(void) {
                             }
 
                         } else if (pid_pipe == 0) {
+
                             close(fd1[0]);
                             dup2(fd1[1], STDOUT_FILENO);
                             close(fd1[1]);
@@ -142,6 +151,7 @@ int main(void) {
                                 printf("Invalid Command!\n");
                                 return 1;
                             }
+                            exit(1);
                         }
                         close(fd1[0]);
                         close(fd1[1]);
@@ -164,6 +174,7 @@ int main(void) {
                 }
                 close(file);
             }
+            exit(1);
         } else if (pid > 0) {
             if (hasAmp == 0) wait(NULL);
         } else {
