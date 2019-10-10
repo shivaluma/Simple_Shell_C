@@ -45,6 +45,8 @@ void readCommandFromUser(char *args[], int *hasAmp, int *argv) {
     freeArgs(args, *argv);
     *argv = 0;
     *hasAmp = 0;
+    // thuc hien tach cac thanh phan duoc ngan bang dau cach va
+    // dua vao mang args
     char *ptr = strtok(userCommand, delimiter);
     while (ptr != NULL) {
         if (ptr[0] == '&') {
@@ -56,6 +58,7 @@ void readCommandFromUser(char *args[], int *hasAmp, int *argv) {
         args[*argv - 1] = strdup(ptr);
         ptr = strtok(NULL, delimiter);
     }
+    // gan phan tu cuoi bang null de execvp biet lenh da ket thuc
     args[*argv] = NULL;
 }
 
@@ -80,6 +83,7 @@ int main(void) {
             } else {
                 int redirectCase = 0;
                 int file;
+                // duyet de kiem tra xem mang args co chua "<", ">", hay "|" hay khong.
                 for (int i = 1; i <= argv - 1; i++) {
                     // next args will be file name.
                     if (strcmp(args[i], "<") == 0) {
