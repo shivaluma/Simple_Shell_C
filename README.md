@@ -1,58 +1,19 @@
-## Thông tin cơ bản:
-Một chương trình C trên hệ thống Linux để phục vụ như một giao diện shell chấp nhận các lệnh của người dùng và sau đó thực thi mỗi lệnh trong một quy trình riêng biệt. Việc triển khai của bạn sẽ hỗ trợ chuyển hướng đầu vào và đầu ra, cũng như các đường ống dưới dạng IPC giữa một cặp lệnh.
+#Simple_Shell_C
+First project of Operating System course
 
-## Hướng dẫn sử dụng
-* Quá trình thực hiện cơ bản
-* Thực hiện lệnh trong một tiến trình con (Executing Command in a Child Process)
-* Tính năng lịch sử (History)
-* Chuyển hướng đầu vào và đầu ra (Redirecting Input and Output)
-* Giao tiếp lệnh qua đường ống (Communication via a Pipe)
+##Overview
+This project consists of designing a C program to serve as a shell interface that accepts user commands and then executes each command in a separate process. Your implementation will support input and output redirection, as well as pipes as a form of IPC between a pair of commands. Completing this project will involve using the UNIX fork(), exec(), wait(), dup2(), and pipe() system calls and can be completed on Linux system.
 
-## Quá trình thực hiện cơ bản 
-Hàm `main()` trình bày dấu nhắc `osh>` ở mỗi dòng. Người dùng sẽ nhập lệnh cần thực hiện vào sau dấu nhắc `osh>` và `Enter` để thực thi
+A shell interface gives the user a prompt, after which the next command is entered. The example below illustrates the prompt osh> and the user’s next command: cat prog.c. (This command displays the file prog.c on the terminal using the UNIX cat command.)
 
-Tiến trình cha đọc những gì người dùng nhập vào dòng lệnh và sau đó tạo một quy trình con riêng biệt thực hiện lệnh. Trừ khi có quy định khác, quy trình cha chờ con thoát ra trước khi tiếp tục. 
+##Executing Command in a Child Process
+The first task is to modify the main() function so that a child process is forked and executes the command specified by the user. This will require parsing what the user has entered into separate tokens and storing the tokens in an array of character strings. For example, if the user enters the command ps -ael at the osh> prompt, the values stored in the args array are: args[0] = "ps" args[1] = "-ael" args[2] = NULL This args array will be passed to the execvp() function, which has the following prototype: execvp(char *command, char *params[]) Here, command represents the command to be performed and params stores the parameters to this command. For this project, the execvp() function should be invoked as execvp(args[0], args). Be sure to check whether the user included & to determine whether or not the parent process is to wait for the child to exit.
 
-Hàm main () liên tục lặp vòng miễn là mode `run` bằng 1
+##Creating a History Feature
+The next task is to modify the shell interface program so that it provides a history feature to allow a user to execute the most recent command by entering !!. For example, if a user enters the command ls -l, she can then execute that command again by entering !! at the prompt. Any command executed in this fashion should be echoed on the user’s screen, and the command should also be placed in the history buffer as the next command. Your program should also manage basic error handling. If there is no recent command in the history, entering !! should result in a message “No commands in history.”
 
-Khi người dùng nhập `exit` tại dấu nhắc, mode `run` được đặt về `0` và chương trình chấm dứt.
+##Redirecting Input and Output
+Your shell should then be modified to support the ‘>’ and ‘<’ redirection operators, where ‘>’ redirects the output of a command to a file and ‘<’ redirects the input to a command from a file. For example, if a user enters osh>ls > out.txt the output from the ls command will be redirected to the file out.txt. Similarly, input can be redirected as well. For example, if the user enters osh>sort < in.txt the file in.txt will serve as input to the sort command. Managing the redirection of both input and output will involve using the dup2() function, which duplicates an existing file descriptor to another file descriptor. For example, if fd is a file descriptor to the file out.txt, the call dup2(fd, STDOUT FILENO); duplicates fd to standard output (the terminal). This means that any writes to standard output will in fact be sent to the out.txt file. You can assume that commands will contain either one input or one output redirection and will not contain both. In other words, you do not have to be concerned with command sequences such as sort < in.txt > out.txt.
 
-## Thực hiện lệnh trong một tiến trình con (Executing Command in a Child Process)
-Quá trình con riêng biệt được tạo bằng cách sử dụng lệnh gọi hệ thống `fork()` và lệnh người dùng được thực thi bằng một trong các lệnh gọi hệ thống trong họ `exec()`. Một tiến trình con được rẽ nhánh và thực thi lệnh được chỉ định bởi người dùng
-
-Ở đây, phân tích chuỗi lệnh người dùng nhập vào thành từng mã thông báo riêng, mỗi mã lưu trong một chuỗi kĩ tự. Gọi hàm `execvp()(args[0], args)` để thực thi. Nếu kiểm tra thấy người dùng có bao gồm kí tự `&` ở cuối lệnh thì xác định quy trình cha không chờ đợi con thoát ra.
-
-## Tính năng lịch sử (History)
-Cho phép người dùng thực thi lệnh gần đây nhất bằng cách nhập `!!`. 
-
-Ví dụ: nếu người dùng nhập lệnh `ls -l`, thì anh ta có thể thực hiện lại lệnh đó bằng cách nhập `!!` tại dấu nhắc. 
-
-Bất kỳ lệnh nào được thực hiện theo kiểu này sẽ được lặp lại trên màn hình người dùng và lệnh này cũng được đặt trong bộ đệm lịch sử làm lệnh tiếp theo. 
-
-Nếu không có lệnh gần đây trong lịch sử, hãy nhập `!!` sẽ dẫn đến một thông báo `“No commands in history.”`.
-
-Đồng thời, nếu kiểm tra lệnh cũ là `!!` thì sẽ vẫn giữ lại bộ đệm lịch sử, hoặc không thì sẽ giải phóng bộ đệm và bắt đầu ghi
-
-## Chuyển hướng đầu vào và đầu ra (Redirecting Input and Output)
-`>` Hồi chuyển hướng đầu ra của một lệnh thành một tệp.
-`<` Hồi chuyển hướng đầu vào thành một lệnh từ một tệp. 
-
-Ví dụ: Nếu người dùng nhập `ls> out.txt`, đầu ra từ lệnh `ls` sẽ được chuyển hướng đến tệp `out.txt`. 
-Tương tự, đầu vào cũng có thể được chuyển hướng. 
-Ví dụ: nếu người dùng nhập `sort <in.txt`, tệp `in.txt` sẽ đóng vai trò là đầu vào cho lệnh `sort`.
-
-Việc quản lý chuyển hướng của cả đầu vào và đầu ra sẽ liên quan đến việc sử dụng hàm `dup2()`, sao chép một bộ mô tả tệp hiện có sang một bộ mô tả tệp khác. 
-Ví dụ: nếu `f` là một mô tả tệp cho tệp `out.txt`, sau dòng lệnh `dup2(f, STDOUT_FILENO);` f được nhân bản thành đầu ra tiêu chuẩn `stdout`. Điều này có nghĩa là bất kỳ ghi vào `stdout` sẽ được gửi đến tệp `out.txt`.
-
-## Giao tiếp lệnh qua đường ống (Communication via a Pipe)
-Cho phép đầu ra của một lệnh được dùng làm đầu vào cho một lệnh khác bằng cách sử dụng một đường ống. 
-
-Chúng ta tách lệnh ban đầu thành 2 lệnh con có dạng `command1 | command2`, sau đó nối 1 đầu pipe vào `stdout` và thực thi lệnh `command1` để lấy kết quả
-Bước tiếp theo, ta nối đầu còn lại pipe vào `stdin` và chạy `command2`
-
-Ví dụ: chuỗi lệnh sau `ls -l | less` có đầu ra của lệnh `ls -l` đóng vai trò là đầu vào cho lệnh `less`. 
-Cả hai lệnh `ls` và `less` sẽ chạy như các tiến trình riêng biệt và sẽ giao tiếp bằng cách sử dụng hàm `pipe()` của UNIX. 
-
-Ở đây chúng ta tách lệnh ban đầu thành 2 lệnh con có dạng `command1: ls -l` và `command2: less`, sau đó nối 1 đầu pipe vào `stdout` và thực thi lệnh `command1` để lấy kết quả, ta được 
-Bước tiếp theo, ta nối đầu còn lại pipe vào `stdin` và chạy `command2`
-Vậy là đầu ra của lệnh `ls -la` được dùng làm đầu vào của `less`. Lệnh người dùng được hoàn tất thực thi
+##Communication via a Pipe
+The final modification to your shell is to allow the output of one command to serve as input to another using a pipe. For example, the following command sequence osh>ls -l | less has the output of the command ls -l serve as the input to the less command. Both the ls and less commands will run as separate processes and will communicate using the UNIX pipe() function. Perhaps the easiest way to create these separate processes is to have the parent process create the child process (which will execute ls -l). This child will also create another child process (which will execute less) and will establish a pipe between itself and the child process it creates. Implementing pipe functionality will also require using the dup2() function as described in the previous section. Finally, although several commands can be chained together using multiple pipes, you can assume that commands will contain only one pipe character and will not be combined with any redirection operators.
